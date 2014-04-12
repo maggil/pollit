@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+        <fragment android:name="com.example.android.fragments.FriendsFragment"
+            android:id="@+id/friends_fragment"
+            android:layout_width="fill_parent"
+            android:text="Hello friends!"
+            android:layout_height="match_parent" />
+
+        <fragment android:name="com.example.android.fragments.MeeperFragment"
+            android:id="@+id/meeper_fragment"
+            android:layout_width="fill_parent"
+            android:text="Hello Meeper!"
+            android:layout_height="match_parent" />
+
+    <fragment android:name="com.example.android.fragments.BlahFragment"
+        android:id="@+id/blah_fragment"
+        android:layout_width="fill_parent"
+        android:text="Blah!"
+        android:layout_height="match_parent" />
+
+</LinearLayout><!-- From: file:/Users/m/Documents/scholarly/professional/pollit/app/src/main/res/layout/fragments.xml -->
