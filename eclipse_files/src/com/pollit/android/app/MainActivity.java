@@ -2,50 +2,32 @@ package com.pollit.android.app;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 
 import com.parse.Parse;
 import com.parse.ParseUser;
-import com.parse.FindCallback;
-import com.parse.GetDataCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
-import com.parse.ParseImageView;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
+import android.app.Activity;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.content.Context;
 import android.content.Intent;
-import android.widget.Toast;
-import android.support.v7.app.ActionBar.Tab;
-import android.R.id;
-import android.graphics.drawable.BitmapDrawable;
-import android.app.Activity;
+import android.support.v7.app.ActionBarActivity;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.view.MotionEvent;
 
 
@@ -80,10 +62,30 @@ public class MainActivity extends ActionBarActivity {
         //PARSE INIT
 		Parse.initialize(this, "WmfBdhTHHEqrwHr50D6uixGoyktvu8woe8fv4EdU", "6FmLA0Ys0j4ibHCAQxasHX4IouPHhg68B8MCDJtj");
 		
+		theUser = new ParseUser();//ParseUser.getCurrentUser();
+		theUser.setUsername("Sharkbait");
+		theUser.setPassword("oohaha");
+		theUser.setEmail("dcmoyer@gmail.com");
+		theUser.put("Friends", "Sharkbait;");
+		try {
+			theUser.signUp();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+			
+		String friendsRaw = (String) theUser.get("Friends");
+		String delims = "[;]";
+		String[] tokens = friendsRaw.split(delims);
+		
+		for(int i = 0; i < tokens.length -1  ; i++){
+			userFriends.add(tokens[i]);
+		}
+		
 		//Camera Init
         
         //Set ActionBar attributes.
-        ActionBar ab = getSupportActionBar();
+        android.support.v7.app.ActionBar ab = getSupportActionBar();
         //ab.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         ab.setDisplayShowTitleEnabled(false);
         ab.setDisplayShowHomeEnabled(false);
@@ -132,12 +134,12 @@ public class MainActivity extends ActionBarActivity {
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
+        public SectionsPagerAdapter(android.support.v4.app.FragmentManager fragmentManager) {
+            super(fragmentManager);
         }
 
         @Override
-        public Fragment getItem(int position) {
+        public android.support.v4.app.Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
         	switch(position){
@@ -181,7 +183,7 @@ public class MainActivity extends ActionBarActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class PlaceholderFragment extends android.support.v4.app.Fragment {
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -192,7 +194,7 @@ public class MainActivity extends ActionBarActivity {
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
+        public static android.support.v4.app.Fragment newInstance(int sectionNumber) {
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
@@ -218,7 +220,7 @@ public class MainActivity extends ActionBarActivity {
         }
     }
     
-    public static class CameraFragment extends Fragment {
+    public static class CameraFragment extends android.support.v4.app.Fragment {
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -229,7 +231,7 @@ public class MainActivity extends ActionBarActivity {
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static CameraFragment newInstance(int sectionNumber) {
+        public static android.support.v4.app.Fragment newInstance(int sectionNumber) {
             CameraFragment fragment = new CameraFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
@@ -260,7 +262,71 @@ public class MainActivity extends ActionBarActivity {
             return rootView;
         }
     }
-
+    
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // gets data and makes a bitmap
+        super.onActivityResult(requestCode, resultCode, data);
+        final Bitmap bp = (Bitmap) data.getExtras().get("data");
+        rand_image.setImageBitmap(bp);
+        rand_image.setOnTouchListener(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                //setContentView(R.layout.after_enter);
+                //rand_image = (View) findViewById(R.id.imageView1);
+                rand_image.setImageBitmap(bp);
+                float x = event.getX();
+                float y = event.getY();
+                
+                return true;
+            }
+        });
+        picture_taken = true;
+        if(resultCode == RESULT_OK) {
+            /*if(userFriends.size() > 2){
+            	Log.i("ParseImageView","Fetch?");
+            	System.exit(1);
+            }*/
+    		ParseQuery<ParseObject> query = ParseQuery.getQuery("TestPoll");//.whereContainedIn("Creator", userFriends);
+    		List<ParseObject> objectList = null;
+			try {
+				objectList = query.find();
+			} catch (ParseException e1) {
+				// TODO Auto-generated catch block
+				//Log.i("ParseImageView","BAD BAD BAD");
+				e1.printStackTrace();
+			}
+    		ParseFile file = (ParseFile) objectList.get(objectList.size()-1).get("Picture");
+        	
+        	byte[] byteArray = null;
+			try {
+				byteArray = file.getData();
+			} catch (ParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+        	rand_image.setImageBitmap(BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length));
+        	
+        	
+        	ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        	bp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        	byteArray = stream.toByteArray();
+    		file = new ParseFile(byteArray);
+    		ParseObject object = new ParseObject("TestPoll");
+    		object.put("Picture", file); 
+    		object.put("Creator",theUser.getUsername());
+    		try {
+				object.save();
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		
+    
+        }
+        
+        
+        
+    }
+    
     /*class MyTabsListener implements ActionBar.TabListener {
         public Fragment fragment;
         public Context context;
