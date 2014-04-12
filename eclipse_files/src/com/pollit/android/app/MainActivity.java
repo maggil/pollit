@@ -1,6 +1,18 @@
 package com.pollit.android.app;
 
+import java.io.ByteArrayOutputStream;
+import java.util.Collection;
 import java.util.Locale;
+
+import com.parse.Parse;
+import com.parse.ParseUser;
+import com.parse.FindCallback;
+import com.parse.GetDataCallback;
+import com.parse.ParseException;
+import com.parse.ParseFile;
+import com.parse.ParseImageView;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
@@ -17,13 +29,24 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.content.Context;
+import android.content.Intent;
 import android.widget.Toast;
 import android.support.v7.app.ActionBar.Tab;
 import android.R.id;
-
+import android.graphics.drawable.BitmapDrawable;
+import android.app.Activity;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Bitmap;
+import android.util.Log;
+import android.view.MotionEvent;
 
 
 
@@ -39,7 +62,10 @@ public class MainActivity extends ActionBarActivity {
      */
     SectionsPagerAdapter mSectionsPagerAdapter;
 
-
+    private ParseUser theUser = null;
+    private Collection<String> userFriends = null;
+	static ImageView rand_image;
+    boolean picture_taken = false;
 
     /**
      * The {@link ViewPager} that will host the section contents.
@@ -51,6 +77,11 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //PARSE INIT
+		Parse.initialize(this, "WmfBdhTHHEqrwHr50D6uixGoyktvu8woe8fv4EdU", "6FmLA0Ys0j4ibHCAQxasHX4IouPHhg68B8MCDJtj");
+		
+		//Camera Init
+        
         //Set ActionBar attributes.
         ActionBar ab = getSupportActionBar();
         //ab.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -64,56 +95,8 @@ public class MainActivity extends ActionBarActivity {
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
-        /*mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                ActionBar a = getSupportActionBar();
-                if(position == 0)
-                {
-                    a.removeAllTabs();
-                    Tab tab1 = a.newTab();
-                    tab1.setTabListener(new MyTabsListener());
-                    tab1.setText("FRIENDS");
-                    tab1.setContentDescription("Friends");
-                    a.addTab(tab1);
-                    Tab tab2 = a.newTab();
-                    tab2.setTabListener(new MyTabsListener());
-                    tab2.setText("+");
-                    tab2.setContentDescription("FriendsBox");
-                    a.addTab(tab2);
-                    a.show();
-                }
-                else if (position == 1)
-                    a.hide();
-                else if (position == 2)
-                {
-                    a.removeAllTabs();
-                    Tab tab1 = a.newTab();
-                    tab1.setTabListener(new MyTabsListener());
-                    tab1.setText("FRIENDS");
-                    a.addTab(tab1);
-                    Tab tab2 = a.newTab();
-                    tab2.setTabListener(new MyTabsListener());
-                    tab2.setText("PUBLIC");
-                    tab2.setContentDescription("Public");
-                    a.addTab(tab2);
-                    a.show();
-                }
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });*/
-
+        
         //generate fragments.
-
 
         mViewPager.setAdapter(mSectionsPagerAdapter);
         mViewPager.setCurrentItem(2);
@@ -157,7 +140,13 @@ public class MainActivity extends ActionBarActivity {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1);
+        	switch(position){
+        		case 2:
+        			return CameraFragment.newInstance(3);
+        		default:
+        			return PlaceholderFragment.newInstance(position + 1);
+        	}
+            
 
         }
 
@@ -224,6 +213,49 @@ public class MainActivity extends ActionBarActivity {
                 case 0:
 
             }
+           // LinearLayout lin = (LinearLayout) rootView.findViewById(R.id.stuff);
+            return rootView;
+        }
+    }
+    
+    public static class CameraFragment extends Fragment {
+        /**
+         * The fragment argument representing the section number for this
+         * fragment.
+         */
+        private static final String ARG_SECTION_NUMBER = "section_number";
+
+        /**
+         * Returns a new instance of this fragment for the given section
+         * number.
+         */
+        public static CameraFragment newInstance(int sectionNumber) {
+            CameraFragment fragment = new CameraFragment();
+            Bundle args = new Bundle();
+            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            fragment.setArguments(args);
+            return fragment;
+        }
+
+        public CameraFragment() {
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                Bundle savedInstanceState) {
+        	super.onCreate(savedInstanceState);
+            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
+            textView.setText(Integer.toString(getArguments().getInt(ARG_SECTION_NUMBER)));
+            
+            rootView.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                    startActivityForResult(intent, 0);
+                }
+            });
+            
            // LinearLayout lin = (LinearLayout) rootView.findViewById(R.id.stuff);
             return rootView;
         }
