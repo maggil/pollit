@@ -4,12 +4,14 @@ import java.util.Locale;
 
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBar.Tab;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,6 +19,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.content.Context;
+
 
 
 public class MainActivity extends ActionBarActivity {
@@ -35,6 +39,10 @@ public class MainActivity extends ActionBarActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     ViewPager mViewPager;
+    Fragment friends;
+    Fragment add;
+    Fragment inbox;
+    Fragment publicx;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,10 +55,68 @@ public class MainActivity extends ActionBarActivity {
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
+        //Set up ActionBar properties.
+        ActionBar ab = getSupportActionBar();
+        ab.setDisplayShowHomeEnabled(false);
+        ab.setDisplayShowTitleEnabled(false);
+        ab.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
+        //Generate fragments.
+        friends = new FriendsF();
+        add = new AddF();
+        inbox = new InboxF();
+        publicx = new PublicxF();
+
+        //Set ViewPager EventListener.
+        mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                ActionBar a = getSupportActionBar();
+                switch (position){
+                    case 0:
+                        //set up Friends and + tabs.
+                        a.removeAllTabs();
+                        Tab t1 = a.newTab().setText("Friends");
+                        t1.setTabListener(new MyTabsListener(friends, getApplicationContext()));
+                        Tab t2 = a.newTab().setText("+");
+                        t2.setTabListener(new MyTabsListener(add, getApplicationContext()));
+                        a.addTab(t1);
+                        a.addTab(t2);
+                        a.show();
+                        return;
+                    case 1:
+                        a.hide();
+                        return;
+                    case 2:
+                        //set up Inbox and Public tabs.
+                        a.removeAllTabs();
+                        Tab t3 = a.newTab().setText("Friends");
+                        t3.setTabListener(new MyTabsListener(inbox, getApplicationContext()));
+                        Tab t4 = a.newTab().setText("Public");
+                        t4.setTabListener(new MyTabsListener(publicx, getApplicationContext()));
+                        a.addTab(t3);
+                        a.addTab(t4);
+                        a.show();
+                        return;
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
+        mViewPager.setCurrentItem(1);
     }
 
 
@@ -59,6 +125,7 @@ public class MainActivity extends ActionBarActivity {
         
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+
         return true;
     }
 
@@ -149,4 +216,32 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+    class MyTabsListener implements ActionBar.TabListener {
+        public Fragment fragment;
+        public Context context;
+
+        public MyTabsListener(Fragment fragment, Context context) {
+            this.fragment = fragment;
+            this.context = context;
+
+        }
+
+        @Override
+        public void onTabReselected(Tab tab, FragmentTransaction ft) {
+          //  ft.replace(R.id.fragment_container, fragment);
+           // Log.v("MainActivity", "fragment");
+        }
+
+        @Override
+        public void onTabSelected(Tab tab, FragmentTransaction ft) {
+           // ft.replace(R.id.fragment_container, fragment);
+        }
+
+        @Override
+        public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+            //ft.replace(R.id.fragment_container, fragment);
+            //ft.remove(fragment);
+        }
+
+}
 }
