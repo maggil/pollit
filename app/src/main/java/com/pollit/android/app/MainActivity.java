@@ -235,6 +235,8 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public void onTabSelected(Tab tab, FragmentTransaction ft) {
            // ft.replace(R.id.fragment_container, fragment);
+            mViewPager.setCurrentItem();
+            mViewPager.
         }
 
         @Override
